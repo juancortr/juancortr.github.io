@@ -57,16 +57,22 @@
 								<h3 > El Tiempo (2016)</h3>
 								<!--Display Slide-->
 								<div >
+									<img class = "mySlides" name="mySlides_eltiempo" src="images/eltiempocirculo/etc_1.jpg">
+									<img class = "mySlides" name="mySlides_eltiempo" src="images/eltiempocirculo/etc_2.jpg">
+									<img class = "mySlides" name="mySlides_eltiempo" src="images/eltiempocirculo/etc_3.jpg">
+									<img class = "mySlides" name="mySlides_eltiempo" src="images/eltiempocirculo/etc_4.jpg">
+									<img class = "mySlides" name="mySlides_eltiempo" src="images/eltiempocirculo/etc_5.jpg">
 								  <div class="displaybottommiddle" style="width:100%; overflow: hidden;">
-								    <div class="display-left" onclick="plusDivs(-1)">&#10094;</div>
-								    <div class="display-right" onclick="plusDivs(1)">&#10095;</div>
+								    <div class="display-left" onclick="plusDivs(-1, 'eltiempo')">&#10094;</div>
+								    <div class="display-right" onclick="plusDivs(1, 'eltiempo')">&#10095;</div>
 								  </div>
 								</div>
 								<!--
 								<span class="image main"><img src="images/pic02.jpg" alt="" /></span>
 								-->
-								<p>Adipiscing magna sed dolor elit. Praesent eleifend dignissim arcu, at eleifend sapien imperdiet ac. Aliquam erat volutpat. Praesent urna nisi, fringila lorem et vehicula lacinia quam. Integer sollicitudin mauris nec lorem luctus ultrices.</p>
-								<p>Nullam et orci eu lorem consequat tincidunt vivamus et sagittis libero. Mauris aliquet magna magna sed nunc rhoncus pharetra. Pellentesque condimentum sem. In efficitur ligula tate urna. Maecenas laoreet massa vel lacinia pellentesque lorem ipsum dolor. Nullam et orci eu lorem consequat tincidunt. Vivamus et sagittis libero. Mauris aliquet magna magna sed nunc rhoncus amet feugiat tempus.</p>
+								<p>Digital strategy proposal for an important local newspaper. Design methodologies and tools were applied on customer relationship management which allowed the identification of consumer patterns and styles. These patterns were then used to build a platform expansion that increases the engagement of side users and boosts the interaction between users.</p>
+								
+								<p class="minor">Done in collaboration with Nathaly Weeber, Mariana Santos & Jimena Martinez at the Faculty of Architecture and Design, Universidad de los Andes.</p>
 							</article>
 						<!-- Intro -->
 							<article id="interaction">
@@ -293,15 +299,15 @@
 						<!-- About -->
 							<article id="about">
 								<h2 class="major">About</h2>
-								<span class="image main"><img src="images/pic03.jpg" alt="" /></span>
+								<span class="image main"><img src="images/pic04.jpg" alt="" /></span>
 								<p class="minor_augmented">BSC Systems and Computing Engineering, minor in Visual Computing<br><br>
 								BFA Design, emphasis in Product Design. <br>
 								 <br>
 								<div class = "about_div">
 								<p >
-									I'm a Colombian designer and engineer currently living in Bogotá.<br>				I'm interested in the application of design thinking on the development of contemporary technologies and digital media. I have working experience in design and development of interactive experiences on the entertainmment industry, data analytics projects for state entities, and strategic design for digital services. 
+									I'm a Colombian designer and engineer currently living in Bogotá.<br>				I'm interested in the application of design thinking on the development of contemporary technologies and digital media. I have experience working on the design and development of interactive experiences for the entertainmment industry, on data analytics projects for state entities, and on strategic design for digital services. 
 
-									<br><br>I explore the technology of new digital media, yet I see technology as a medium itself. I believe in the poetics of fiction and the relevance of speculative design in the creative process.
+									<br><br>I explore the technology of new digital media, yet I see technology as a medium itself. I believe in the poetics of fiction and the relevance of speculative design in the creative process for critical thinking.
 								 </p>
 								 <br><br>
 								 <ul class="icons">
@@ -322,7 +328,7 @@
 
 				<!-- Footer -->
 					<footer id="footer">
-						<p class="copyright">&copy; Juan Camilo Ortiz R. 2017</p>
+						<p class="copyright">Juan Camilo Ortiz Román 2017</p>
 					</footer>
 
 			</div>
@@ -348,6 +354,7 @@
 		showDivs(slideIndex, 'somebody');
 		showDivs(slideIndex, 'asobancaria');
 		showDivs(slideIndex, 'spitch');
+		showDivs(slideIndex, 'eltiempo');
 
 		function plusDivs(n, name) {
 		    showDivs(slideIndex += n, name);
