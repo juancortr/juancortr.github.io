@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+  <!-- jQuery library -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+  <!-- Latest compiled JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <style>
+
+  rect {
+    stroke: #ddd;
+  }
+      select.disabled{
+        color:gray;
+      }
+      div.chcboxsdiv{
+          background-color: white;
+          display:block;
+          float: left;
+          width:98%;
+          margin: 10px;
+          border: 1px solid #000000;
+          color:black;
+          padding: 10px;
+      }
+      select:disabled { color: gray; }
+      .btncollapse{
+          background-color: gray;
+          border:0px;
+          float:right;
+      }
+      div.radbutdiv{
+          background-color: white;
+          display:block;
+          text-align:left;
+          float: right;
+          width:400px;
+          height:100px;
+          color:black;
+      }
+  div.tooltip{
+      position:absolute;
+      text-align:center;
+      width:240px;
+      height:90px;
+      padding:2px;
+      font:10px sans-serif;
+      background: lightgray;
+      border 0px;
+      border-radius: 8px;
+      pointer-events:none;
+    }
+    p.disclaimer{
+      font-size:10pt;
+      color:gray;
+      margin:20px;
+      text-align:center;
+    }
+      div.info{
+          position:float;         
+          text-align: center;      
+          width: 100%;                    
+          height: 50px;   
+          color:black;         
+          font: 30px sans-serif;      
+          background: white; 
+      }
+       div.icicletree{
+          position:block;         
+          margin:auto;
+          padding:10px;
+      }
+  </style>
+</head>
+<body>
+  <div class="info"><h1>Proporciones de Actividades</h1></div>
+  <div class="chcboxsdiv">
+    <button type="button" class="btn btn-info btncollapse" data-toggle="collapse" data-target="#filtros">Desplegar/Esconder Filtros</button><br><br>
+    <div id="filtros">
+        <p><b>Elija la fuente de datos, el criterio de proporción y el año de los registros a visualizar:</b></p>
+        <select id="sourceSelect" style="" onchange="updateDataSource()">
+          <option value="ccb_" disabled>CCB
+          <option value="ica_">ICA
+        </select>
+        <select id="critSelect" onchange="updateCriterio()">
+          <option value="crit_contribuyentes">#Contribuyentes únicos en actividad
+          <option value="crit_ingresos">Ingreso Gravable
+          <option value="crit_pagado">Total pagado
+          <option value="crit_indicecontribs">Proporción de contribuyentes con respecto a todo el impuesto
+        </select>
+        <select id="anhoSelect" onchange="updateAnho()">
+          <option value="" disabled>Todos los años
+          <!--<option value="_2012" disabled>2012
+          <option value="_2013" disabled>2013-->
+          <option value="_2014">2014
+          <option value="_2015">2015
+          <option value="_2016">2016
+        </select><br><br>
+        <!--
+        <b>Régimen:</b>
+        <form id ="selectRegimen" onchange="updateRegimen()">
+          <input type="radio"   id="regimenTodos" name="regimen" value="_todos" style="margin-right:10px;margin-left:10px" checked="checked" disabled>Todos<br>
+          <input type="radio" id="regimenComun" name="regimen" value="comun" style="margin-right:10px;margin-left:10px" disabled>Común
+          <select id="periodoSelect" onchange="updatePeriodo()" disabled>
+            <option value="">Todos los años
+            <option value="_1">1
+            <option value="_2">2
+            <option value="_3">3
+            <option value="_4">4
+            <option value="_5">5
+            <option value="_6">6
+            <option value="_0">Periodo no identificado
+          </select>
+          <br>
+          <input type="radio"  id="regimenSimplificado" name="regimen" value="simplificado" style="margin-right:10px;margin-left:10px" disabled>Simplificado<br>
+        </form>
+      -->
+      </div>
+    </div>
+    <div class ="icicletree" id="icicletree"></div>
+  </body>
+  <p class="disclaimer"><i>*El número de contribuyentes es considerado por actividad. Es decir, se analizan las actividades y sus contribuyentes únicos; si un contribuyente declara simultáneamente sobre dos o más actividades, así mismo serán considerados, no como una sola entidad en los registros sino como única entidad en las actividades de las que participa.</i></p>
+  <footer>
+
+        
+  </footer>
+<script>
+  
+  var informalidades = {};
+  var periodoSeleccionat ='';
+  var anhoSeleccionat ='_2014';
+  var criterio = 'Contribuyentes';
+  var fuenteSeleccionat = 'ica_';
+  var criterioSeleccionat = 'contribuyentes';
+  //var regimenSeleccionat ='_todo';
+  var regimenSeleccionat ='';
+
+  var acumTotal;
+var width = window.innerWidth-30,
+    height = 300;
+
+var x = d3.scale.linear()
+    .range([0, width]);
+
+var y = d3.scale.linear()
+    .range([0, height]);
+
+var color = d3.scale.category10();
+
+var partition = d3.layout.partition()
+    .children(function(d) { return isNaN(d.value) ? d3.entries(d.value) : null; })
+    .value(function(d) { return d.value; });
+
+var svg = d3.select("#icicletree").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+ var div =d3.select("body").append("div")
+ .attr("class","tooltip")
+ .style("opacity", 0);
+
+ var rect = svg.selectAll("rect");
+ //for(int i = 0 ; i<)
+
+ var ssv = d3.dsv(";", "text/plain");
+  ssv("data/Informalidades2014.txt", function(data) {
+}).row(function(d){
+    informalidades[d.actividad] = {};
+    informalidades[d.actividad].empleados = d.empleadosinf;
+    informalidades[d.actividad].porcentaje = d.porcentaje
+  });
+
+console.log(informalidades)
+
+ d3.json("data/ica_contribuyentes_2014.json", function(error, root) {
+ //d3.json("ccb_contribuyentes.json", function(error, root) {
+    if (error) throw error;
+    //acumTotal = root[0].value;
+    
+    rect = rect
+        .data(partition(d3.entries(root)[0]))
+      .enter().append("rect")
+        .attr("x", function(d) { 
+          if (!d.parent){acumTotal = d.value}
+          return x(d.x);
+        })
+        .attr("y", function(d) { return y(d.y); })
+        .attr("width", function(d) { return x(d.dx); })
+        .attr("height", function(d) { return y(d.dy); })
+        .attr("title", function(d){ return d.key})
+        .attr("fill", function(d) {
+          return (d.key.startsWith("00")||d.key.startsWith("nan"))? "lightgray":(d.depth<=1? d3.hsl(color(d.key)).darker(1): (d.depth==2?d3.hsl(color(d.parent.key)):(d.depth==3?d3.hsl(color(d.parent.parent.key)).brighter(0.5):d3.hsl(color(d.parent.parent.parent.key)).darker(0.5))));
+        })
+        .attr("informalidad", function(d){
+          if (d.depth>=1){
+            //informalidades[d.key.substring(0,2)]?console.log(d.key.substring(0,2)+"....."+informalidades[d.key.substring(0,2)].empleados): console.log(undefined);
+            
+            return informalidades[d.key.substring(0,2)];
+          }
+        })
+        //.attr("fill", function(d,i) { console.log(d);return color(i); })
+        .on("click", clicked)
+        .on("mouseover", hoverific);
+  });
+function updatePeriodo(){  
+  var x = document.getElementById("periodoSelect").value;
+  periodoSeleccionat = x;
+  update();
+}
+function updateRegimen(){
+  var x = document.querySelector('input[name="regimen"]:checked').value
+  if(x=='comun'){
+    //document.getElementById("anhoSelect").options[0].disabled=true; 
+    //Habilitar seleccion de periodo
+    document.getElementById("periodoSelect").disabled=false;
+    var y = document.getElementById("periodoSelect").value;
+    //regimenSeleccionat=y;
+    regimenSeleccionat='_comun';
+  }
+  else if(x == 'simplificado'){
+    //document.getElementById("anhoSelect").options[0].disabled=true;
+    document.getElementById("periodoSelect").disabled=true;
+    regimenSeleccionat='_simple';
+  }
+  else{
+    document.getElementById("anhoSelect").options[0].disabled=false;
+    document.getElementById("periodoSelect").disabled=true;
+    regimenSeleccionat='_todo';
+  }
+  update();
+}
+
+
+function updateAnho(){
+  var x = document.getElementById("anhoSelect").value;
+  anhoSeleccionat = x;
+  update();
+}
+
+function updateCriterio(){
+  var x = document.getElementById("critSelect").value;
+  if(x=='crit_contribuyentes'){
+    criterioSeleccionat = 'contribuyentes';
+    criterio = '#Contribuyentes';
+  }
+  else if(x =='crit_indicecontribs'){
+    criterioSeleccionat = 'indicecontribs';
+    criterio = 'Proporción de contribuyentes';
+  }
+  else if(x =='crit_ingresos'){
+    criterioSeleccionat = 'ingresos';
+    criterio = 'Ingreso gravable';
+  }
+  else if(x =='crit_pagado'){
+    criterioSeleccionat = 'pagado';
+    criterio = 'Total Pagado';
+  }
+  update();
+}
+
+function updateDataSource(){
+  var x = document.getElementById("sourceSelect").value;
+  if(x=='ccb_'){
+    document.getElementById("critSelect").options[2].disabled = false;
+    document.getElementById("critSelect").options[3].disabled = true;
+    document.getElementById("critSelect").options[4].disabled = true;
+
+    document.getElementById("regimenTodos").disabled = true;
+    document.getElementById("regimenComun").disabled = true;
+    document.getElementById("regimenSimplificado").disabled = true;
+
+    document.getElementById("anhoSelect").disabled = true;
+
+    console.log('CCB');
+
+    fuenteSeleccionat = 'ccb_';
+  }
+  else if(x =='ica_'){
+    document.getElementById("critSelect").options[2].disabled = true;
+    document.getElementById("critSelect").options[3].disabled = false;
+    document.getElementById("critSelect").options[4].disabled = false;
+
+
+    document.getElementById("regimenTodos").disabled = false;
+    document.getElementById("regimenComun").disabled = false;
+    document.getElementById("regimenSimplificado").disabled = false;
+
+    document.getElementById("anhoSelect").disabled = false;
+    console.log('ICA');
+    fuenteSeleccionat = 'ica_';
+  }
+  update();
+}
+
+ function update(){
+  //archivo = fuenteSeleccionat+criterioSeleccionat+regimenSeleccionat+anhoSeleccionat+periodoSeleccionat+'.json';
+  archivo = fuenteSeleccionat+criterioSeleccionat+anhoSeleccionat+'.json';
+  console.log(archivo);
+  d3.json("data/"+archivo, function(error, root) {
+    if (error) throw error;
+
+    d3.select('#icicletree').select("svg").remove();
+    svg = d3.select("#icicletree").append("svg")
+      .attr("width", width)
+      .attr("height", height);
+
+    rect = svg.selectAll("rect")
+        .data(partition(d3.entries(root)[0]))
+      .enter().append("rect")
+        .attr("x", function(d) { 
+          if (!d.parent){acumTotal = d.value;console.log(acumTotal)}
+          return x(d.x);
+        })
+        .attr("y", function(d) { return y(d.y); })
+        .attr("width", function(d) { return x(d.dx); })
+        .attr("height", function(d) { return y(d.dy); })
+        .attr("title", function(d){ return d.key})
+        .attr("fill", function(d) { 
+          return (d.key.startsWith("00")||d.key.startsWith("nan"))? "lightgray":(d.depth<=1? d3.hsl(color(d.key)).darker(1): (d.depth==2?d3.hsl(color(d.parent.key)):(d.depth==3?d3.hsl(color(d.parent.parent.key)).brighter(0.5):d3.hsl(color(d.parent.parent.parent.key)).darker(0.5))));
+        })
+        .on("click", clicked)
+        .on("mouseover", hoverific);
+  });
+
+  svg = d3.select("icicletree").transition();
+ }
+
+function hoverific(d){
+    div.transition().duration(200).style("opacity", 0.9);
+    div.html(function(){
+      var valor = d.value.toLocaleString(
+        'es-CO', // use a string like 'en-US' to override browser locale
+        { minimumFractionDigits: 0}
+      );  
+      var regreso =  "<i><strong style='text-align:center'>"+(d.key.startsWith("nan")?d.key+"Actividades NO Identificadas":d.key)+"</strong></i><br>"
+     +criterio+":<strong>"+valor+"</strong><br>";
+     if(d.parent){
+        regreso +="Participación frente al total: <strong>"+parseFloat((d.value/acumTotal) * 100).toFixed(2).replace('.',',')+"%</strong><br>";
+        if(d.depth==1){
+        if(informalidades[d.key.substring(0,2)]){
+          var informalidadEmpls = parseInt(informalidades[d.key.substring(0,2)].empleados).toLocaleString(
+            'es-CO', // use a string like 'en-US' to override browser locale
+            { minimumFractionDigits: 0}
+          );  
+          var informalidadPorc = informalidades[d.key.substring(0,2)].porcentaje.toLocaleString(
+            'es-CO', // use a string like 'en-US' to override browser locale
+            { minimumFractionDigits: 0}
+          ); 
+          regreso += "<strong>"+informalidadEmpls+"  ("+informalidadPorc+"%)</strong> empleados son informales"
+        }
+        else{
+          regreso += "<b><i> Informalidad no disponible </i></b>"
+        }
+      }
+     }
+     else{
+      regreso +="<strong></strong> 100 %<br>";
+     }
+      return regreso;
+ //}).style("left", x(d.x)+(x(d.dx)/2)+"px")
+ //  .style("top", y(d.y)+(y(d.dy)/2)+"px");
+ }).style("left", (d3.event.pageX>window.innerWidth*0.8?(d3.event.pageX-200)+"px":(d3.event.pageX)+"px"))
+   .style("top", (d3.event.pageY)+"px");
+
+  d3.select(this).select('text').text(function(){
+    return d.key;
+  });
+
+}
+function clicked(d) {
+  x.domain([d.x, d.x + d.dx]);
+  y.domain([d.y, 1]).range([d.y ? 20 : 0, height]);
+
+  rect.transition()
+      .duration(750)
+      .attr("x", function(d) { return x(d.x); })
+      .attr("y", function(d) { return y(d.y); })
+      .attr("width", function(d) { return x(d.x + d.dx) - x(d.x); })
+      .attr("height", function(d) { return y(d.y + d.dy) - y(d.y); });
+}
+
+
+//update("ccb_NUM_ESTABLE.json");
+</script>
