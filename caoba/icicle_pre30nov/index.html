@@ -84,25 +84,23 @@
         <p><b>Elija la fuente de datos, el criterio de proporción y el año de los registros a visualizar:</b></p>
         <select id="sourceSelect" style="" onchange="updateDataSource()">
           <option value="ccb_">CCB
-          <option value="ica_" selected="">ICA
+          <option value="ica_">ICA
         </select>
         <select id="critSelect" onchange="updateCriterio()">
           <option value="crit_contribuyentes">#Contribuyentes únicos en actividad
-          <option value="crit_ingresos">Ingreso Gravable
-          <option value="crit_pagado">Total pagado
-          <option value="crit_indicecontribs">Proporción de contribuyentes con respecto a todo el impuesto
+          <option value="crit_establecimientos">#Establecimientos en actividad
           <option value="crit_empleados">#Empleados
-          <option value="crit_establecimientos">#Establecimientos
+          <option value="crit_ingresoGravable" disabled>Ingreso Gravable
+          <option value="crit_totalPagado" disabled>Total pagado
         </select>
-        <select id="anhoSelect" onchange="updateAnho()">
-          <option value="" disabled>Todos los años
+        <select id="anhoSelect" onchange="updateAnho()" disabled>
+          <option value="">Todos los años
           <!--<option value="_2012" disabled>2012
           <option value="_2013" disabled>2013-->
           <option value="_2014">2014
           <option value="_2015">2015
           <option value="_2016">2016
         </select><br><br>
-        <!--
         <b>Régimen:</b>
         <form id ="selectRegimen" onchange="updateRegimen()">
           <input type="radio"   id="regimenTodos" name="regimen" value="_todos" style="margin-right:10px;margin-left:10px" checked="checked" disabled>Todos<br>
@@ -120,7 +118,6 @@
           <br>
           <input type="radio"  id="regimenSimplificado" name="regimen" value="simplificado" style="margin-right:10px;margin-left:10px" disabled>Simplificado<br>
         </form>
-      -->
       </div>
     </div>
     <div class ="icicletree" id="icicletree"></div>
@@ -134,12 +131,11 @@
   
   var informalidades = {};
   var periodoSeleccionat ='';
-  var anhoSeleccionat ='_2014';
+  var anhoSeleccionat ='';
   var criterio = 'Contribuyentes';
-  var fuenteSeleccionat = 'ica_';
+  var fuenteSeleccionat = 'ccb_';
   var criterioSeleccionat = 'contribuyentes';
-  //var regimenSeleccionat ='_todo';
-  var regimenSeleccionat ='';
+  var regimenSeleccionat ='_todo';
 
   var acumTotal;
 var width = window.innerWidth-30,
@@ -178,7 +174,7 @@ var svg = d3.select("#icicletree").append("svg")
 
 console.log(informalidades)
 
- d3.json("data/ica_contribuyentes_2014.json", function(error, root) {
+ d3.json("data/ccb_contribuyentes.json", function(error, root) {
  //d3.json("ccb_contribuyentes.json", function(error, root) {
     if (error) throw error;
     //acumTotal = root[0].value;
@@ -249,25 +245,21 @@ function updateCriterio(){
     criterioSeleccionat = 'contribuyentes';
     criterio = '#Contribuyentes';
   }
-  else if(x =='crit_indicecontribs'){
-    criterioSeleccionat = 'indicecontribs';
-    criterio = 'Proporción de contribuyentes';
-  }
-  else if(x =='crit_ingresos'){
-    criterioSeleccionat = 'ingresos';
-    criterio = 'Ingreso gravable';
-  }
-  else if(x =='crit_pagado'){
-    criterioSeleccionat = 'pagado';
-    criterio = 'Total Pagado';
-  }
   else if(x =='crit_establecimientos'){
     criterioSeleccionat = 'establecimientos';
-    criterio = 'Establecimientos';
+    criterio = '#Establecimientos';
   }
   else if(x =='crit_empleados'){
     criterioSeleccionat = 'empleados';
-    criterio = 'Empleados';
+    criterio = '#Empleados';
+  }
+  else if(x =='crit_ingresoGravable'){
+    criterioSeleccionat = 'ingresos';
+    criterio = 'Ingreso gravable';
+  }
+  else if(x =='crit_totalPagado'){
+    criterioSeleccionat = 'pagado';
+    criterio = 'Total Pagado';
   }
   update();
 }
@@ -275,46 +267,39 @@ function updateCriterio(){
 function updateDataSource(){
   var x = document.getElementById("sourceSelect").value;
   if(x=='ccb_'){
-    document.getElementById("critSelect").options[1].disabled = true;
-    document.getElementById("critSelect").options[2].disabled = true;
+    document.getElementById("critSelect").options[2].disabled = false;
     document.getElementById("critSelect").options[3].disabled = true;
-    document.getElementById("critSelect").options[4].disabled = false;
-    document.getElementById("critSelect").options[5].disabled = false;
+    document.getElementById("critSelect").options[4].disabled = true;
 
-    //document.getElementById("regimenTodos").disabled = true;
-    //document.getElementById("regimenComun").disabled = true;
-    //document.getElementById("regimenSimplificado").disabled = true;
+    document.getElementById("regimenTodos").disabled = true;
+    document.getElementById("regimenComun").disabled = true;
+    document.getElementById("regimenSimplificado").disabled = true;
 
     document.getElementById("anhoSelect").disabled = true;
-    anhoSeleccionat = "";
 
     console.log('CCB');
 
     fuenteSeleccionat = 'ccb_';
   }
   else if(x =='ica_'){
-    document.getElementById("critSelect").options[1].disabled = false;
-    document.getElementById("critSelect").options[2].disabled = false;
+    document.getElementById("critSelect").options[2].disabled = true;
     document.getElementById("critSelect").options[3].disabled = false;
-    document.getElementById("critSelect").options[4].disabled = true;
-    document.getElementById("critSelect").options[5].disabled = true;
+    document.getElementById("critSelect").options[4].disabled = false;
 
 
-    //document.getElementById("regimenTodos").disabled = false;
-    //document.getElementById("regimenComun").disabled = false;
-    //document.getElementById("regimenSimplificado").disabled = false;
+    document.getElementById("regimenTodos").disabled = false;
+    document.getElementById("regimenComun").disabled = false;
+    document.getElementById("regimenSimplificado").disabled = false;
 
     document.getElementById("anhoSelect").disabled = false;
     console.log('ICA');
     fuenteSeleccionat = 'ica_';
-    anhoSeleccionat = document.getElementById("anhoSelect").value;
   }
   update();
 }
 
  function update(){
-  //archivo = fuenteSeleccionat+criterioSeleccionat+regimenSeleccionat+anhoSeleccionat+periodoSeleccionat+'.json';
-  archivo = fuenteSeleccionat+criterioSeleccionat+anhoSeleccionat+'.json';
+  archivo = fuenteSeleccionat+criterioSeleccionat+regimenSeleccionat+anhoSeleccionat+periodoSeleccionat+'.json';
   console.log(archivo);
   d3.json("data/"+archivo, function(error, root) {
     if (error) throw error;
