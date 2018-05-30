@@ -10,6 +10,7 @@ var totem3X = []
 
 var positionBuffer, textureCoordBuffer, indexBuffer;
 
+var positions, textureCoordinates, indices;
 var buffers;
 var texture;
 
@@ -302,19 +303,19 @@ window.onresize = function(event) {
       var stride = (3)*4; //4 bytes per vertex
 
       gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+      //gl.bufferData();
 
-      var a_position = gl.getAttribLocation(scene.textureProgram, 'a_position');
-      gl.vertexAttribPointer(a_position, 3, gl.FLOAT, false, 0, 0);
+      var a_position = gl.getAttribLocation(scene.textureProgram, 'a_position');  
       gl.enableVertexAttribArray(a_position);
-
+      //gl.vertexAttribPointer(a_position, 3, gl.FLOAT, gl.FALSE, 0, 0);
 
       gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
       var aTextureCoord = gl.getAttribLocation(scene.textureProgram, 'a_texcoord');
-      gl.vertexAttribPointer(aTextureCoord, 2, gl.FLOAT, false, 0, 0);
+      //gl.vertexAttribPointer(aTextureCoord, 2, gl.FLOAT, gl.FALSE, 0, 0);
       gl.enableVertexAttribArray(aTextureCoord);
 
       
-      gl.drawArrays(gl.TRIANGLE_FAN, 0, positionBuffer.numItems);
+      //gl.drawArrays(gl.TRIANGLE_FAN, 0, positionBuffer.numItems);
 
       //modelviewMatrix.set(viewMatrix).multiply(modelMatrix);
       //gl.uniformMatrix4fv(u_modelviewMatrix, false, modelviewMatrix.elements);
@@ -362,7 +363,6 @@ window.onresize = function(event) {
         [{container: 'vertex-shader', type: gl.VERTEX_SHADER},
          {container: 'fragment-shader', type: gl.FRAGMENT_SHADER}]);
 
- 
       gl.useProgram(program);
 
       program.positionAttribute = gl.getAttribLocation(program, 'pos');
@@ -470,10 +470,10 @@ window.onresize = function(event) {
 
       gl.useProgram(textureProgram);
 
-      textureProgram.buffers = buffers;
+      //textureProgram.buffers = buffers;
       textureProgram.positionAttribute = gl.getAttribLocation(textureProgram, 'a_position');
       gl.enableVertexAttribArray(textureProgram.positionAttribute);
-      
+
       textureProgram.textureAttribute = gl.getAttribLocation(textureProgram, 'a_texcoord');
       gl.enableVertexAttribArray(textureProgram.textureAttribute);
 
@@ -481,9 +481,9 @@ window.onresize = function(event) {
 
       textureProgram.matrixLocation = gl.getUniformLocation(program, "u_matrix");
       textureProgram.textureLocation = gl.getUniformLocation(program, "u_texture");
-
       //Totems init ----------------
-      initTotemBuffers(gl);
+      initTotemBuffers(gl, textureProgram);
+
 
       gl.useProgram(null);
 
@@ -626,9 +626,9 @@ document.onmousemove = handleMouseMove;
         //console.log(event.pageX + ' '+event.pageY);
       }
 
-function initTotemBuffers(gl){
+function initTotemBuffers(gl, program){
 
-      var positions = [
+      positions = [
         // Front face
         -1.0, -1.0,  1.0,
          1.0, -1.0,  1.0,
@@ -636,10 +636,12 @@ function initTotemBuffers(gl){
         -1.0,  1.0,  1.0 ];
 
       positionBuffer = gl.createBuffer();
+
       gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
       positionBuffer.itemSize = 3;
       positionBuffer.numItems = positions.length / 3;
+      //gl.vertexAttribPointer(positionBuffer, positionBuffer.itemSize, gl.FLOAT, gl.FALSE, 0, 0);
 
 
       textureCoordinates = [
