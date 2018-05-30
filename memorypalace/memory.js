@@ -249,6 +249,6 @@
  
     $(document).ready(function() {
       //loadMesh('models/monkey.obj')
-      loadMesh('models/memorypalace.obj')
+      loadMesh('models/memorypalacetriangulated.obj')
     });
  
