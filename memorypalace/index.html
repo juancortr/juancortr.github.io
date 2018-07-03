@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
   <head>
-    <title>Juanco's Memory Palace</title>
+    <title>Memory Palace</title>
     <script type="x-shader/x-vertex" id="vertex-shader">
     precision mediump float;
  
@@ -13,7 +13,14 @@
     uniform mat4 projectionMatrix, viewMatrix, modelMatrix;
     uniform mat3 normalMatrix;
  
-    uniform vec3 ambientLightColour, directionalLight, materialSpecular;
+    uniform vec3 ambientLightColour;
+    uniform vec3 directionalLight;
+
+    uniform vec3 spotCogitans;
+    uniform float u_limit;
+    uniform vec3 cog_color;
+
+    uniform vec3 materialSpecular;
     uniform float materialAmbient, materialDiffuse, shininess;
  
     /* A function to determine the colour of a vertex, accounting
@@ -23,33 +30,141 @@
       vec3 s = normalize(vec3(vec4(directionalLight,1.0) - position));
       vec3 v = normalize(vec3(-position));
       vec3 r = reflect(-s, norm);
-      return ambientLightColour +
-        materialDiffuse * max(dot(s,norm), 0.0) +
-        materialSpecular * pow(max(dot(r,v), 0.0), shininess);
+
+      vec3 cg = normalize(vec3(vec4(spotCogitans,1.0) - position));
+      vec3 cr = reflect(cg, norm);
+
+      float cogitansLight = 0.0;
+      float cogitansSpecular = 0.0;
+
+
+      float dotFromDirectionCog = dot(cg,norm);
+
+
+      if(dotFromDirectionCog >= u_limit){
+        cogitansLight = dot(norm, cg);
+        if(cogitansLight>0.0){
+          cogitansSpecular = pow(dot(cr,v), shininess);
+        }
+      }
+
+      return ambientLightColour 
+      + materialDiffuse * max(dot(s,norm), 0.0) 
+      //+ materialDiffuse * max(cogitansLight, 0.0) 
+      //+ materialSpecular * pow(max(dot(cr,v), 0.0), shininess)*cog_color
+      //+ materialSpecular * cogitansSpecular*cog_color
+       ;
     }
  
     void main() {
-      vec3 eyeNormal = normalize(normalMatrix * normal);
+      vec3 eyeNormal = normalize(normal);
       vec4 eyePosition =  viewMatrix * modelMatrix * vec4(pos, 1.0);
+
       col = min(vec3(0.0) + ads(eyePosition, eyeNormal), 1.0);
-      gl_Position = projectionMatrix * viewMatrix * modelMatrix *
-        vec4(pos, 1.0); 
+      gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(pos, 1.0); 
     }
     </script>
     <script type="x-shader/x-fragment" id="fragment-shader">
     precision mediump float;
- 
+    varying vec3 normal;
+    uniform mat4 projectionMatrix, viewMatrix, modelMatrix;
+    
     varying vec3 col;
  
     void main() {
+      vec3 v_normal = normalize(normal);
+
       gl_FragColor = vec4(col, 1.0);
+    }
+    </script>
+    <script type="x-shader/x-vertex" id="vertex-shader-texture">
+    attribute vec4 a_position;
+    attribute vec2 a_texcoord;
+     
+    uniform mat4 u_matrix;
+     
+    varying vec2 v_texcoord;
+     
+    void main() {
+      // Multiply the position by the matrix.
+      gl_Position = u_matrix * a_position;
+     
+      // Pass the texcoord to the fragment shader.
+      v_texcoord = a_texcoord;
+    }
+    </script>
+    <script type="x-shader/x-fragment" id="fragment-shader-texture">
+    precision mediump float;
+ 
+    // Passed in from the vertex shader.
+    varying vec2 v_texcoord;
+     
+    // The texture.
+    uniform sampler2D u_texture;
+     
+    void main() {
+       gl_FragColor = texture2D(u_texture, v_texcoord);
     }
     </script>
     <script type="text/javascript" src="dist/jquery-2.1.1.js"></script>
     <script type="text/javascript" src="dist/gl-matrix.js"></script>
+<script src="https://webglfundamentals.org/webgl/resources/webgl-lessons-ui.js"></script>
+
     <script type="text/javascript" src="memory.js"></script>
+<style>
+.slidecontainer {
+    width: 100%;
+}
+
+.slider {
+    -webkit-appearance: none;
+    width: 800px;
+    height: 25px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+}
+h2{
+  font-family: sans-serif;
+  font-style: oblique;
+  font-size: 15px;
+  padding:0;
+}
+h3{
+  font-family: sans-serif;
+  font-style: normal;
+  font-size: 12px;
+  padding:0;
+}
+.slider:hover {
+    opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    background: #68D1ED;
+    cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    background: #68D1ED;
+    cursor: pointer;
+}
+</style>
+
   </head>
   <body>
     <canvas id="rendering-surface" height="600" width="800"></canvas>
+    <!--<div>
+<h3>Limit:</h3>
+<input type="range" min="0" max="360" value="120" class="slider" id="myRange" oninput="limitSliderChange(this.value)">
+</div>-->
   </body>
 </html>
